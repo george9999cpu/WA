@@ -5,28 +5,128 @@ import {
   type Listing,
   type NewListing,
 } from "../data/listings";
+import type { ClothingRequest } from "../data/requests";
+import { sampleUsers, type User } from "../data/users";
+
+type AppState = {
+  users: User[];
+  currentUserId: string;
+  listings: Listing[];
+  requests: ClothingRequest[];
+};
 
 type AppContextValue = {
-  listings: Listing[];
+  state: AppState;
+  switchUser: (userId: string) => void;
   addListing: (input: NewListing) => void;
+  sendRequest: (listingId: string, offerDescription: string) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [listings, setListings] = useState<Listing[]>(sampleListings);
+  const [state, setState] = useState<AppState>({
+    users: sampleUsers,
+    currentUserId: "omar",
+    listings: sampleListings,
+    requests: [],
+  });
+
+  function switchUser(userId: string) {
+    setState((current) => {
+      if (!current.users.some((user) => user.id === userId)) {
+        return current;
+      }
+
+      return { ...current, currentUserId: userId };
+    });
+  }
 
   function addListing(input: NewListing) {
-    const listing: Listing = {
-      ...input,
-      id: String(Date.now()),
-    };
+    if (
+      !input.title.trim() ||
+      !input.description.trim() ||
+      !input.size.trim() ||
+      !input.category.trim() ||
+      !input.condition.trim() ||
+      !input.photo
+    ) {
+      return;
+    }
 
-    setListings((current) => [listing, ...current]);
+    if (
+      input.type === "Sale" &&
+      (!Number.isFinite(input.price) || (input.price ?? 0) <= 0)
+    ) {
+      return;
+    }
+
+    const id = String(Date.now());
+
+    setState((current) => {
+      const listing: Listing = {
+        ...input,
+        title: input.title.trim(),
+        description: input.description.trim(),
+        price: input.type === "Sale" ? input.price : undefined,
+        id,
+        ownerId: current.currentUserId,
+        status: "available",
+      };
+
+      return {
+        ...current,
+        listings: [listing, ...current.listings],
+      };
+    });
+  }
+
+  function sendRequest(listingId: string, offerDescription: string) {
+    const id = String(Date.now());
+
+    setState((current) => {
+      const listing = current.listings.find((item) => item.id === listingId);
+
+      if (
+        !listing ||
+        listing.ownerId === current.currentUserId ||
+        listing.status !== "available"
+      ) {
+        return current;
+      }
+
+      if (listing.type === "Exchange" && !offerDescription.trim()) {
+        return current;
+      }
+
+      const existing = current.requests.some(
+        (request) =>
+          request.listingId === listingId &&
+          request.requesterId === current.currentUserId &&
+          request.status !== "rejected",
+      );
+
+      if (existing) return current;
+
+      const request: ClothingRequest = {
+        id,
+        listingId,
+        requesterId: current.currentUserId,
+        type: listing.type,
+        offerDescription:
+          listing.type === "Exchange" ? offerDescription.trim() : undefined,
+        status: "pending",
+      };
+
+      return {
+        ...current,
+        requests: [request, ...current.requests],
+      };
+    });
   }
 
   return (
-    <AppContext.Provider value={{ listings, addListing }}>
+    <AppContext.Provider value={{ state, switchUser, addListing, sendRequest }}>
       {children}
     </AppContext.Provider>
   );

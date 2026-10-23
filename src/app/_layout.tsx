@@ -1,8 +1,9 @@
 import "../global.css";
 
+import { Stack } from "expo-router";
+
 import { AppProvider } from "@/state/app-context";
 import { colors } from "@/theme/tokens";
-import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
@@ -15,6 +16,8 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="search" options={{ title: "Search & filters" }} />
+        <Stack.Screen name="items/[id]" options={{ title: "Item details" }} />
       </Stack>
     </AppProvider>
   );
