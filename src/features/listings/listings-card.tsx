@@ -21,7 +21,11 @@ export function ListingCard({ listing }: ListingCardProps) {
           EGP {listing.price}
         </Text>
       ) : (
-        <Text>Open to an exchange</Text>
+        <Text>
+          {listing.type === "Donation"
+            ? "Free to a new home"
+            : "Open to an exchange"}
+        </Text>
       )}
     </View>
   );
