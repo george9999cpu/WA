@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
     Image,
@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { DemoUserSwitcher } from "@/components/demo-user-switcher";
+import { Button } from "@/components/ui/button";
 import type { Listing } from "@/data/listings";
 import { useApp } from "@/state/app-context";
 
@@ -73,7 +74,20 @@ export default function ItemDetailsScreen() {
       </View>
 
       {ownListing ? (
-        <Text>This is your listing.</Text>
+        <View className="gap-3">
+          <Text>This is your listing.</Text>
+          {listing.status !== "completed" ? (
+            <Button
+              label="Edit listing"
+              onPress={() =>
+                router.push({
+                  pathname: "/listings/[id]/edit",
+                  params: { id: listing.id },
+                })
+              }
+            />
+          ) : null}
+        </View>
       ) : (
         <RequestForm
           key={`${state.currentUserId}-${listing.id}`}
