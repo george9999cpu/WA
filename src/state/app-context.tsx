@@ -24,6 +24,8 @@ type AppContextValue = {
   deleteListing: (listingId: string) => boolean;
   updateListingStatus: (listingId: string, status: ListingStatus) => boolean;
   sendRequest: (listingId: string, offerDescription: string) => void;
+  acceptRequest: (requestId: string) => void;
+  rejectRequest: (requestId: string) => void;
 };
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -261,12 +263,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  // Only the listing owner can accept, only while the request is pending and
+  // the listing is still available. The request and the listing change in the
+  // same state update. Competing requests are left untouched.
+  function acceptRequest(requestId: string) {
+    setState((current) => {
+      const request = current.requests.find((item) => item.id === requestId);
+
+      if (!request || request.status !== "pending") return current;
+
+      const listing = current.listings.find(
+        (item) => item.id === request.listingId,
+      );
+
+      if (
+        !listing ||
+        listing.ownerId !== current.currentUserId ||
+        listing.status !== "available"
+      ) {
+        return current;
+      }
+
+      return {
+        ...current,
+        requests: current.requests.map((item) =>
+          item.id === requestId ? { ...item, status: "accepted" } : item,
+        ),
+        listings: current.listings.map((item) =>
+          item.id === listing.id ? { ...item, status: "reserved" } : item,
+        ),
+      };
+    });
+  }
+
+  function rejectRequest(requestId: string) {
+    setState((current) => {
+      const request = current.requests.find((item) => item.id === requestId);
+
+      if (!request || request.status !== "pending") return current;
+
+      const listing = current.listings.find(
+        (item) => item.id === request.listingId,
+      );
+
+      if (!listing || listing.ownerId !== current.currentUserId) {
+        return current;
+      }
+
+      return {
+        ...current,
+        requests: current.requests.map((item) =>
+          item.id === requestId ? { ...item, status: "rejected" } : item,
+        ),
+      };
+    });
+  }
+
   return (
     <AppContext.Provider
       value={{
         state,
         switchUser,
         addListing,
+        sendRequest,
+        acceptRequest,
+        rejectRequest,
         updateListing,
         deleteListing,
         updateListingStatus,
