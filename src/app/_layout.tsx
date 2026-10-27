@@ -19,6 +19,10 @@ export default function RootLayout() {
         <Stack.Screen name="search" options={{ title: "Search & filters" }} />
         <Stack.Screen name="items/[id]" options={{ title: "Item details" }} />
         <Stack.Screen name="requests/[id]" options={{ title: "Request details" }} />
+        <Stack.Screen
+          name="listings/[id]/edit"
+          options={{ title: "Edit listing" }}
+        />
       </Stack>
     </AppProvider>
   );
