@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlatList, Pressable, Text, View } from "react-native";
 
 import {
-  completionLabel,
+  getCompletionLabel,
   type ListingType,
 } from "@/data/listings";
 import { useApp } from "@/state/app-context";
@@ -13,7 +13,7 @@ type Filter = "All" | ListingType;
 const filters: Filter[] = ["All", "Sale", "Exchange", "Donation"];
 
 function filterLabel(filter: Filter): string {
-  return filter === "All" ? "All" : completionLabel(filter);
+  return filter === "All" ? "All" : getCompletionLabel(filter);
 }
 
 function SummaryBox({ label, value }: { label: string; value: number }) {

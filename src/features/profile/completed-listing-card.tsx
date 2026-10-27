@@ -1,7 +1,7 @@
 import { Link } from "expo-router";
 import { Image, Pressable, Text, View } from "react-native";
 
-import { completionLabel, type Listing } from "@/data/listings";
+import { getCompletionLabel, type Listing } from "@/data/listings";
 
 export function CompletedListingCard({ listing }: { listing: Listing }) {
   return (
@@ -32,7 +32,7 @@ export function CompletedListingCard({ listing }: { listing: Listing }) {
 
             <View className="rounded-full bg-green-100 px-3 py-1">
               <Text className="text-sm font-semibold text-green-900">
-                {completionLabel(listing.type)}
+                {getCompletionLabel(listing.type)}
               </Text>
             </View>
           </View>
