@@ -28,6 +28,57 @@ export type Listing = {
   status: ListingStatus;
 };
 
+export const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
+export const categoryOptions = [
+  "Tops",
+  "Bottoms",
+  "Outerwear",
+  "Dresses",
+  "Other",
+];
+export const conditionOptions = ["New", "Like new", "Good", "Fair"];
+export const typeOptions: ListingType[] = ["Sale", "Exchange", "Donation"];
+
+export type SamplePhoto = {
+  label: string;
+  source: ImageSourcePropType;
+};
+
+export const samplePhotos: SamplePhoto[] = [
+  {
+    label: "Linen shirt",
+    source: require("../../assets/images/listings/linen-shirt.jpg"),
+  },
+  {
+    label: "Denim jacket",
+    source: require("../../assets/images/listings/denim-jacket.jpg"),
+  },
+  {
+    label: "Cotton top",
+    source: require("../../assets/images/listings/cotton-top.jpg"),
+  },
+  {
+    label: "Summer dress",
+    source: require("../../assets/images/listings/summer-dress.jpg"),
+  },
+  {
+    label: "Winter coat",
+    source: require("../../assets/images/listings/winter-coat.jpg"),
+  },
+];
+
+export function getCompletionLabel(type: ListingType) {
+  if (type === "Sale") return "sold";
+  if (type === "Exchange") return "exchanged";
+  return "donated";
+}
+
+export function getStatusLabel(listing: Listing) {
+  return listing.status === "completed"
+    ? getCompletionLabel(listing.type)
+    : listing.status;
+}
+
 export const sampleListings: Listing[] = [
   {
     id: "1",
@@ -39,7 +90,7 @@ export const sampleListings: Listing[] = [
     condition: "Good",
     type: "Sale",
     price: 250,
-    photo: require("../../assets/images/listings/linen-shirt.jpg"),
+    photo: samplePhotos[0].source,
     status: "available",
   },
   {
@@ -52,7 +103,7 @@ export const sampleListings: Listing[] = [
     category: "Outerwear",
     condition: "Good",
     type: "Exchange",
-    photo: require("../../assets/images/listings/denim-jacket.jpg"),
+    photo: samplePhotos[1].source,
     status: "available",
   },
   {
@@ -64,7 +115,7 @@ export const sampleListings: Listing[] = [
     category: "Tops",
     condition: "Like new",
     type: "Donation",
-    photo: require("../../assets/images/listings/cotton-top.jpg"),
+    photo: samplePhotos[2].source,
     status: "available",
   },
 ];
