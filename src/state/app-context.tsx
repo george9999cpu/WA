@@ -19,6 +19,7 @@ type AppState = {
 type AppContextValue = {
   state: AppState;
   switchUser: (userId: string) => void;
+  updateProfile: (input: Pick<User, "name" | "location" | "bio">) => void;
   addListing: (input: NewListing) => boolean;
   updateListing: (listingId: string, input: NewListing) => boolean;
   deleteListing: (listingId: string) => boolean;
@@ -117,6 +118,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  function updateProfile(input: Pick<User, "name" | "location" | "bio">) {
+    const name = input.name.trim();
+    const location = input.location.trim();
+    const bio = input.bio.trim();
+
+    if (!name || !location) {
+      return;
+    }
+
+    setState((current) => ({
+      ...current,
+      users: current.users.map((user) =>
+        user.id === current.currentUserId
+          ? { ...user, name, location, bio }
+          : user,
+      ),
+    }));
+  }
+
   function addListing(input: NewListing) {
     if (!isValidListing(input)) {
       return false;
@@ -213,6 +233,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         listings: current.listings.map((listing) =>
           listing.id === listingId ? { ...listing, status } : listing,
         ),
+        // Releasing a reservation also reopens its accepted request.
+        requests:
+          status === "available"
+            ? current.requests.map((request) =>
+                request.listingId === listingId && request.status === "accepted"
+                  ? { ...request, status: "pending" }
+                  : request,
+              )
+            : current.requests,
       };
     });
 
@@ -324,6 +353,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         state,
         switchUser,
+        updateProfile,
         addListing,
         sendRequest,
         acceptRequest,
@@ -331,7 +361,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         updateListing,
         deleteListing,
         updateListingStatus,
-        sendRequest,
       }}
     >
       {children}

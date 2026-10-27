@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { router } from "expo-router";
 import { FlatList, Text, View } from "react-native";
 
 import { DemoUserSwitcher } from "@/components/demo-user-switcher";
@@ -10,8 +10,16 @@ const MY_REQUESTS = "My requests";
 const INCOMING_REQUESTS = "Incoming requests";
 
 export default function RequestsScreen() {
+  return <RequestsList incoming={false} />;
+}
+
+export function IncomingRequestsScreen() {
+  return <RequestsList incoming />;
+}
+
+function RequestsList({ incoming }: { incoming: boolean }) {
   const { state } = useApp();
-  const [view, setView] = useState(MY_REQUESTS);
+  const view = incoming ? INCOMING_REQUESTS : MY_REQUESTS;
 
   const myRequests = state.requests.filter(
     (request) => request.requesterId === state.currentUserId,
@@ -23,8 +31,20 @@ export default function RequestsScreen() {
     return listing?.ownerId === state.currentUserId;
   });
 
-  const showingMine = view === MY_REQUESTS;
+  const showingMine = !incoming;
   const data = showingMine ? myRequests : incomingRequests;
+
+  function changeView(value: string) {
+    if (value === view) return;
+
+    if (!incoming) {
+      router.push("/incoming-requests");
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/requests");
+    }
+  }
 
   function nameOf(userId: string | undefined) {
     return state.users.find((user) => user.id === userId)?.name ?? "Unknown";
@@ -43,7 +63,7 @@ export default function RequestsScreen() {
               label="Requests"
               options={[MY_REQUESTS, INCOMING_REQUESTS]}
               value={view}
-              onChange={setView}
+              onChange={changeView}
             />
           </View>
         }
